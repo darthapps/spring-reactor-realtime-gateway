@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: realtime-gateway
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/payment_gateway
+      auto-index-creation: true
