@@ -1,12 +1,25 @@
-# The Challenge: "The Real-Time Payment Gateway"
+# Real-Time Payment Gateway
 
-**Scenario:** You are building the public-facing API for an Instant Transfer service. You need to expose a REST endpoint that accepts a transfer request, validates it against multiple internal services, and executes it on a legacy core banking system.
+This project implements a high-performance, reactive payment gateway API designed to handle instant transfer requests. It orchestrates validation across multiple internal services (Risk, Ledger) and executes transactions on a core banking system, ensuring low latency and high resilience.
 
-## The Endpoint
-`POST /api/v1/payments`
+## Architecture Overview
 
-### The Request Body
+The service exposes a RESTful API built with **Spring WebFlux** to handle high concurrency. It employs a non-blocking, event-driven architecture to perform parallel validations before committing transactions.
 
+### Key Features
+*   **Reactive Stack:** Built on Project Reactor for non-blocking I/O.
+*   **Parallel Processing:** Executes Risk and Ledger checks concurrently to minimize response time.
+*   **Resilience:** Implements timeouts and fallback strategies for flaky external dependencies (e.g., Risk Service).
+*   **Graceful Error Handling:** Maps domain-specific errors (Insufficient Funds, High Risk) to appropriate HTTP status codes.
+
+## API Specification
+
+### Create Payment
+Initiates a new payment transfer.
+
+**Endpoint:** `POST /api/v1/payments`
+
+**Request Body:**
 ```json
 {
   "userId": "user_123",
@@ -15,46 +28,28 @@
 }
 ```
 
-## The Logic Flow
+**Response Codes:**
+*   `200 OK`: Payment accepted and processed.
+*   `403 Forbidden`: Transaction rejected due to high risk.
+*   `422 Unprocessable Entity`: Insufficient funds.
+*   `404 Not Found`: User does not exist.
 
-1.  **Pre-Check:** Verify the user exists.
-2.  **Parallel Risk & Funds:**
-    *   **Risk Check:** Call `RiskService`. If risk is "HIGH", reject immediately.
-    *   **Funds Check:** Call `LedgerService`. If false (insufficient funds), reject.
-    *   *Constraint:* These must run in parallel to minimize latency.
-3.  **Execution:** If all checks pass, save the transaction to the `LegacyBankingSystem` (Blocking JDBC).
+## Logic Flow
 
-## Response
+1.  **User Validation:** Verifies the existence of the user.
+2.  **Parallel Validation:**
+    *   **Risk Assessment:** Queries the `RiskService`. If the service is slow (>500ms) or fails, it defaults to a high-risk safety fallback.
+    *   **Funds Check:** Queries the `LedgerService` to ensure sufficient balance.
+3.  **Transaction Execution:** Upon successful validation, the transaction is persisted to the core banking system.
 
-*   **Success:** HTTP 200 + JSON `{ "status": "ACCEPTED", "txId": "..." }`
-*   **Risk Failure:** HTTP 403 Forbidden.
-*   **No Funds:** HTTP 422 Unprocessable Entity.
-*   **User Not Found:** HTTP 404 Not Found.
+## Technology Stack
 
-## The Mocks (Copy these to start)
+*   **Java 21**
+*   **Spring Boot 3.x** (WebFlux)
+*   **MongoDB** (Reactive Driver)
+*   **Docker**
+*   **Maven**
 
-```java
-// Domain Objects
-record PaymentRequest(String userId, BigDecimal amount, String targetAccount) {}
-record PaymentResponse(String txId, String status) {}
-enum RiskLevel { LOW, MEDIUM, HIGH }
+## Getting Started
 
-// Services
-Mono<Boolean> userExists(String userId); // Async
-Mono<RiskLevel> checkRisk(String userId); // Async, Slow (need timeout)
-Mono<Boolean> hasSufficientFunds(String userId, BigDecimal amount); // Async
-PaymentResponse executeTransfer(PaymentRequest request); // BLOCKING I/O
-```
-
-## Your Task
-
-Create the `PaymentController` and the `PaymentService`.
-
-### Constraints
-
-*   The Controller method must return `Mono<ResponseEntity<PaymentResponse>>`.
-*   The `RiskService` is flaky: Timeout after 500ms and fallback to `RiskLevel.HIGH` (Safety first: if we can't check risk, assume it's risky).
-*   Handle the Blocking I/O correctly.
-*   Map the business errors (Funds/Risk) to the correct HTTP Status Codes.
-
-**Go! Build the project structure as you see fit.**
+For detailed setup, running instructions, and testing commands, please refer to [INSTRUCTIONS.md](INSTRUCTIONS.md).
