@@ -4,13 +4,14 @@ This project implements a high-performance, reactive payment gateway API designe
 
 ## Architecture Overview
 
-The service exposes a RESTful API built with **Spring WebFlux** to handle high concurrency. It employs a non-blocking, event-driven architecture to perform parallel validations before committing transactions.
+The service exposes a RESTful API built with **Spring WebFlux** to handle high concurrency. It employs a non-blocking, reactive architecture to perform parallel validations before committing transactions.
 
 ### Key Features
 *   **Reactive Stack:** Built on Project Reactor for non-blocking I/O.
 *   **Parallel Processing:** Executes Risk and Ledger checks concurrently to minimize response time.
 *   **Resilience:** Implements timeouts and fallback strategies for flaky external dependencies (e.g., Risk Service).
 *   **Graceful Error Handling:** Maps domain-specific errors (Insufficient Funds, High Risk) to appropriate HTTP status codes.
+*   **API Documentation:** Integrated Swagger UI for easy API exploration.
 
 ## API Specification
 
@@ -33,6 +34,10 @@ Initiates a new payment transfer.
 *   `403 Forbidden`: Transaction rejected due to high risk.
 *   `422 Unprocessable Entity`: Insufficient funds.
 *   `404 Not Found`: User does not exist.
+
+### Swagger UI
+You can access the interactive API documentation at:
+`http://localhost:8080/webjars/swagger-ui/index.html`
 
 ## Logic Flow
 

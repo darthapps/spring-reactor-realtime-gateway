@@ -5,3 +5,9 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/payment_gateway
       auto-index-creation: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
