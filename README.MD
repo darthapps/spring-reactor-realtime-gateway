@@ -12,6 +12,7 @@ The service exposes a RESTful API built with **Spring WebFlux** to handle high c
 *   **Resilience:** Implements timeouts and fallback strategies for flaky external dependencies (e.g., Risk Service).
 *   **Graceful Error Handling:** Maps domain-specific errors (Insufficient Funds, High Risk) to appropriate HTTP status codes.
 *   **API Documentation:** Integrated Swagger UI for easy API exploration.
+*   **TDD Approach:** The project was developed using Test-Driven Development (TDD), ensuring high code quality, reliability, and comprehensive test coverage from the start.
 
 ## API Specification
 
